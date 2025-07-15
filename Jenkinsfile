@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION  = 'us-east-1'
-        S3_BUCKET   = 'yash-react-app'             // 👈 Change to your bucket
+        AWS_REGION  = 'ap-south-1'
+        S3_BUCKET   = 'yash-react-app'             // 🔁 Change this
     }
 
     stages {

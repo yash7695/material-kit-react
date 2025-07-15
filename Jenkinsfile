@@ -1,13 +1,9 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'Node18'  // Replace with the exact name you configured in Jenkins
-    }
-
     environment {
         AWS_REGION  = 'us-east-1'
-        S3_BUCKET   = 'your-s3-bucket-name'          // 🔁 Change this
+        S3_BUCKET   = 'yash-react-app'             // 👈 Change to your bucket
     }
 
     stages {
@@ -17,13 +13,13 @@ pipeline {
             }
         }
 
-        stage('Build React App') {
+        stage('Build Project') {
             steps {
                 sh 'npm run build'
             }
         }
 
-        stage('Deploy to S3') {
+        stage('Upload to S3') {
             steps {
                 withAWS(region: "${AWS_REGION}", credentials: 'aws-credentials-id') {
                     sh '''
@@ -36,10 +32,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ S3 Deployment Successful!'
+            echo '✅ Successfully deployed to S3!'
         }
         failure {
-            echo '❌ Pipeline failed.'
+            echo '❌ Pipeline failed. Check logs.'
         }
     }
 }

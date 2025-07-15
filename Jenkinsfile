@@ -1,19 +1,30 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'Node-18' // Make sure this is set in Jenkins -> Global Tools
+    }
+
     environment {
-        AWS_REGION  = 'ap-south-1'
-        S3_BUCKET   = 'yash-react-app'             // 🔁 Change this
+        AWS_REGION = 'us-east-1'
+        S3_BUCKET = 'yash-react-app '
+        BUILD_DIR = 'build'
     }
 
     stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
             }
         }
 
-        stage('Build Project') {
+        stage('Build React App') {
             steps {
                 sh 'npm run build'
             }
@@ -21,9 +32,21 @@ pipeline {
 
         stage('Upload to S3') {
             steps {
-                withAWS(region: "${AWS_REGION}", credentials: 'aws-credentials-id') {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-creds',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
                     sh '''
-                        aws s3 sync build/ s3://$S3_BUCKET/ --delete
+                        echo "Setting AWS credentials..."
+                        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                        aws configure set region $AWS_REGION
+
+                        echo "Uploading to S3..."
+                        aws s3 cp $BUILD_DIR s3://$S3_BUCKET/ --recursive
                     '''
                 }
             }
@@ -32,10 +55,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Successfully deployed to S3!'
+            echo '✅ Deployment to S3 successful!'
         }
         failure {
-            echo '❌ Pipeline failed. Check logs.'
+            echo '❌ Deployment failed.'
         }
     }
 }

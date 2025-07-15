@@ -1,11 +1,13 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'Node18'  // Replace with the exact name you configured in Jenkins
+    }
+
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')   // Jenkins credentials ID
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        AWS_REGION            = 'ap-south-1'                        // your AWS region
-        S3_BUCKET             = 'your-s3-bucket-name'               // replace with your bucket
+        AWS_REGION  = 'us-east-1'
+        S3_BUCKET   = 'your-s3-bucket-name'          // 🔁 Change this
     }
 
     stages {
@@ -34,10 +36,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment to S3 completed successfully!'
+            echo '✅ S3 Deployment Successful!'
         }
         failure {
-            echo '❌ Deployment failed!'
+            echo '❌ Pipeline failed.'
         }
     }
 }
